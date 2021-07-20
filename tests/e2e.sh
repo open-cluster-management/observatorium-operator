@@ -81,7 +81,7 @@ deploy_operator() {
     $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-configmap.yaml
     $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-secret.yaml
     $KUBECTL apply -f manifests/crds
-    $SED_CMD -e "s,quay.io/observatorium/observatorium-operator,$OPERATOR_IMAGE_NAME," manifests/operator.yaml 
+    $SED_CMD -i -e "s,quay.io/observatorium/observatorium-operator:latest,$OPERATOR_IMAGE_NAME," manifests/operator.yaml 
     $KUBECTL apply -n default -f manifests/
     $KUBECTL apply -n observatorium -f example/manifests
     wait_for_cr observatorium-xyz
@@ -125,7 +125,7 @@ run_test() {
     $KUBECTL wait --for=condition=available --timeout=10m -n observatorium-minio deploy/minio || (must_gather "$ARTIFACT_DIR" && exit 1)
     $KUBECTL wait --for=condition=available --timeout=10m -n observatorium deploy/observatorium-xyz-thanos-query-frontend || (must_gather "$ARTIFACT_DIR" && exit 1)
     $KUBECTL wait --for=condition=available --timeout=10m -n observatorium deploy/observatorium-xyz-loki-query-frontend || (must_gather "$ARTIFACT_DIR" && exit 1)
-    $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-configmap.yaml
+    $KUBECTL apply -n default -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-configmap.yaml
     $KUBECTL apply -n default -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-up-metrics"$suffix".yaml
 
     sleep 5

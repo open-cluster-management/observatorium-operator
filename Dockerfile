@@ -8,12 +8,13 @@ COPY . operator/
 COPY ./jsonnet/vendor/github.com/observatorium/deployments/components/ components/
 COPY ./jsonnet/vendor/github.com/observatorium/deployments/environments/base/default-config.libsonnet operator/jsonnet/
 # Build
+WORKDIR /workspace/operator
 RUN GO111MODULE="on" go build github.com/brancz/locutus
 
 FROM alpine:3.10 as runner
 WORKDIR /
-COPY --from=builder /workspace/locutus /
-COPY --from=builder /workspace/operator/jsonnet /environments/operator
+COPY --from=builder /workspace/operator/locutus /
+COPY --from=builder /workspace/operator/jsonnet /
 COPY --from=builder /workspace/components/ /components/
 COPY --from=builder /workspace/operator/jsonnet/vendor/ /vendor/
 RUN chgrp -R 0 /vendor && chmod -R g=u /vendor
@@ -44,4 +45,4 @@ LABEL vendor="Observatorium" \
     org.label-schema.vendor="observatorium/observatorium-operator" \
     org.label-schema.version=$VERSION
 
-ENTRYPOINT ["/locutus", "--renderer=jsonnet", "--renderer.jsonnet.entrypoint=environments/operator/main.jsonnet", "--trigger=resource", "--trigger.resource.config=environments/operator/config.yaml"]
+ENTRYPOINT ["/locutus", "--renderer=jsonnet", "--renderer.jsonnet.entrypoint=main.jsonnet", "--trigger=resource", "--trigger.resource.config=config.yaml"]
